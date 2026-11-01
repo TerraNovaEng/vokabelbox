@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabelbox Memory Game - English & German</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        germanCardBg: '#1e3a8a',  /* Deep Blue for German */
+                        englishCardBg: '#065f46', /* Deep Emerald for English */
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-900 text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Section -->
+    <header class="w-full bg-slate-800/80 backdrop-blur border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-amber-400 bg-clip-text text-transparent">
+                    Vokabelbox Memory
+                </h1>
+                <p class="text-xs text-slate-400">Match English terms with their German counterparts</p>
+            </div>
+            
+            <!-- Dashboard Stats & Controls -->
+            <div class="flex items-center flex-wrap justify-center gap-4">
+                <div class="flex items-center gap-3 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-700 text-sm">
+                    <div>
+                        <span class="text-slate-400">Pairs: </span>
+                        <span id="match-count" class="font-bold text-amber-400">0</span> / <span id="total-pairs">10</span>
+                    </div>
+                    <div class="h-4 w-[1px] bg-slate-700"></div>
+                    <div>
+                        <span class="text-slate-400">Moves: </span>
+                        <span id="move-count" class="font-bold text-blue-400">0</span>
+                    </div>
+                    <div class="h-4 w-[1px] bg-slate-700"></div>
+                    <div>
+                        <span class="text-slate-400">Time: </span>
+                        <span id="timer" class="font-bold text-emerald-400">00:00</span>
+                    </div>
+                </div>
+
+                <button onclick="initGame()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Restart
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Board -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center items-center">
+        <!-- Legend / Color Guide -->
+        <div class="flex items-center justify-center gap-6 mb-6 text-xs text-slate-300">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-blue-600 inline-block shadow-sm shadow-blue-500/50"></span>
+                <span>German Card (<span class="font-semibold text-blue-300">Deutsch</span> - Navy)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-amber-600 inline-block shadow-sm shadow-amber-500/50"></span>
+                <span>English Card (<span class="font-semibold text-amber-300">English</span> - Amber/Coral)</span>
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="game-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 w-full max-w-4xl">
+            <!-- Cards populated dynamically via JS -->
+        </div>
+    </main>
+
+    <!-- Win Modal Overlay -->
+    <div id="win-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-8 max-w-md w-full text-center shadow-2xl animate-fade-in">
+            <div class="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                🏆
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">Ausgezeichnet! (Wonderful!)</h2>
+            <p class="text-slate-300 text-sm mb-6">You successfully matched all vocabulary pairs!<br>Moves: <span id="final-moves" class="font-bold text-blue-400">0</span> | Time: <span id="final-time" class="font-bold text-emerald-400">00:00</span></p>
+            <button onclick="initGame()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/30">
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-800">
+        Vokabelbox Memory Game • GitHub Pages Ready
+    </footer>
+
+    <!-- Game Logic -->
+    <script>
+        // Expanded vocabulary dataset with pair IDs and conversation terms
+        const vocabPairs = [
+            { id: 1, en: "House", de: "Haus" },
+            { id: 2, en: "Tree", de: "Baum" },
+            { id: 3, en: "Dog", de: "Hund" },
+            { id: 4, en: "Quiet / Silence", de: "Ruhe / Stille" },
+            { id: 5, en: "Economy", de: "Wirtschaft" },
+            { id: 6, en: "Unemployed", de: "Arbeitslos" },
+            { id: 7, en: "Power Outlet", de: "Steckdose" },
+            { id: 8, en: "Slippers", de: "Pantoffeln" },
+            { id: 9, en: "Charming", de: "Charmant" },
+            { id: 10, en: "Attic / Loft", de: "Dachgeschoss" }
+        ];
+
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let isProcessing = false;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let timerStarted = false;
+
+        const gridEl = document.getElementById('game-grid');
+        const matchCountEl = document.getElementById('match-count');
+        const totalPairsEl = document.getElementById('total-pairs');
+        const moveCountEl = document.getElementById('move-count');
+        const timerEl = document.getElementById('timer');
+        const winModalEl = document.getElementById('win-modal');
+        const finalMovesEl = document.getElementById('final-moves');
+        const finalTimeEl = document.getElementById('final-time');
+
+        totalPairsEl.textContent = vocabPairs.length;
+
+        function startTimer() {
+            if (timerStarted) return;
+            timerStarted = true;
+            secondsElapsed = 0;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                timerEl.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerStarted = false;
+        }
+
+        function initGame() {
+            stopTimer();
+            matchedPairs = 0;
+            moves = 0;
+            secondsElapsed = 0;
+            timerEl.textContent = "00:00";
+            flippedCards = [];
+            isProcessing = false;
+            matchCountEl.textContent = matchedPairs;
+            moveCountEl.textContent = moves;
+            winModalEl.classList.add('hidden');
+
+            let deck = [];
+            vocabPairs.forEach(pair => {
+                deck.push({
+                    uniqueId: `${pair.id}-de`,
+                    pairId: pair.id,
+                    text: pair.de,
+                    lang: 'de',
+                    langLabel: 'DE'
+                });
+                deck.push({
+                    uniqueId: `${pair.id}-en`,
+                    pairId: pair.id,
+                    text: pair.en,
+                    lang: 'en',
+                    langLabel: 'EN'
+                });
+            });
+
+            cards = deck.sort(() => Math.random() - 0.5);
+            renderBoard();
+        }
+
+        function renderBoard() {
+            gridEl.innerHTML = '';
+            cards.forEach((card, index) => {
+                const isGerman = card.lang === 'de';
+                // Distinct color scheme: German in Deep Navy/Blue, English in Warm Amber/Coral
+                const accentBorder = isGerman ? 'border-blue-500/40 hover:border-blue-400' : 'border-amber-500/40 hover:border-amber-400';
+                const badgeBg = isGerman ? 'bg-blue-600 text-white' : 'bg-amber-600 text-white';
+                const frontBg = isGerman ? 'bg-gradient-to-br from-blue-950 to-slate-900 border-blue-500/50 text-blue-100' : 'bg-gradient-to-br from-amber-950 to-slate-900 border-amber-500/50 text-amber-100';
+
+                const cardEl = document.createElement('div');
+                cardEl.className = `perspective-1000 h-28 sm:h-32 cursor-pointer select-none`;
+                cardEl.dataset.index = index;
+                
+                cardEl.innerHTML = `
+                    <div class="card-inner relative w-full h-full duration-500 transform-style-3d rounded-2xl shadow-md ${accentBorder} border">
+                        <!-- Card Back -->
+                        <div class="card-back absolute inset-0 w-full h-full bg-slate-800 rounded-2xl flex flex-col items-center justify-center p-3 backface-hidden border border-slate-700 hover:bg-slate-750 transition">
+                            <span class="text-xl mb-1">🎴</span>
+                            <span class="text-[10px] font-medium text-slate-400 tracking-wider">VOKABELBOX #${card.pairId}</span>
+                        </div>
+                        <!-- Card Front -->
+                        <div class="card-front absolute inset-0 w-full h-full ${frontBg} rounded-2xl flex flex-col items-center justify-center p-3 backface-hidden rotate-y-180 text-center shadow-inner">
+                            <span class="absolute top-2 right-2 text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${badgeBg}">${card.langLabel}</span>
+                            <span class="text-xs sm:text-sm font-semibold px-2">${card.text}</span>
+                            <span class="absolute bottom-1.5 left-2 text-[9px] text-slate-400/80 font-mono">Pair ID: ${card.pairId}</span>
+                        </div>
+                    </div>
+                `;
+
+                cardEl.addEventListener('click', () => handleCardClick(index, cardEl));
+                gridEl.appendChild(cardEl);
+            });
+        }
+
+        function handleCardClick(index, element) {
+            if (isProcessing) return;
+            startTimer();
+            const clickedCard = cards[index];
+            const innerCard = element.querySelector('.card-inner');
+
+            if (innerCard.classList.contains('rotate-y-180') || element.classList.contains('matched')) return;
+
+            innerCard.classList.add('rotate-y-180');
+            flippedCards.push({ index, card: clickedCard, element: innerCard });
+
+            if (flippedCards.length === 2) {
+                moves++;
+                moveCountEl.textContent = moves;
+                isProcessing = true;
+
+                const [first, second] = flippedCards;
+
+                if (first.card.pairId === second.card.pairId && first.card.lang !== second.card.lang) {
+                    setTimeout(() => {
+                        first.element.parentElement.classList.add('matched', 'opacity-75', 'pointer-events-none');
+                        second.element.parentElement.classList.add('matched', 'opacity-75', 'pointer-events-none');
+                        matchedPairs++;
+                        matchCountEl.textContent = matchedPairs;
+                        flippedCards = [];
+                        isProcessing = false;
+
+                        if (matchedPairs === vocabPairs.length) {
+                            stopTimer();
+                            finalMovesEl.textContent = moves;
+                            finalTimeEl.textContent = timerEl.textContent;
+                            winModalEl.classList.remove('hidden');
+                        }
+                    }, 400);
+                } else {
+                    setTimeout(() => {
+                        first.element.classList.remove('rotate-y-180');
+                        second.element.classList.remove('rotate-y-180');
+                        flippedCards = [];
+                        isProcessing = false;
+                    }, 900);
+                }
+            }
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
