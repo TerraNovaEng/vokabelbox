@@ -48,7 +48,7 @@
                 <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-amber-400 bg-clip-text text-transparent flex items-center gap-2">
                     📦 Vokabelbox Memory
                 </h1>
-                <p class="text-xs text-slate-400">Match German vocabulary with correct English translations</p>
+                <p class="text-xs text-slate-400">Match German vocabulary & 5 Core Edge Categories</p>
             </div>
             
             <!-- Dashboard Stats & Controls -->
@@ -69,6 +69,16 @@
                         <span id="timer" class="font-bold text-emerald-400">00:00</span>
                     </div>
                 </div>
+
+                <!-- Category Selector -->
+                <select id="category-select" onchange="initGame()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-2 outline-none focus:border-indigo-500 transition cursor-pointer">
+                    <option value="all">📚 All Vocabularies</option>
+                    <option value="greetings">👋 1. Greetings & Basics</option>
+                    <option value="questions">❓ 2. Questions & Inquiries</option>
+                    <option value="feelings">🌡️ 3. Physical Feelings & States</option>
+                    <option value="reactions">💬 4. Reactions & Interjections</option>
+                    <option value="connectors">🔗 5. Connectors & Adverbs</option>
+                </select>
 
                 <!-- Round Size Selector -->
                 <select id="round-size" onchange="initGame()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-2 outline-none focus:border-indigo-500 transition cursor-pointer">
@@ -124,423 +134,81 @@
         Vokabelbox Matching Game • Built with Tailwind CSS
     </footer>
 
-    <!-- Game Logic & wurt JSON Array -->
+    <!-- Game Logic & Datasets -->
     <script>
-        // Full user-provided vocabulary dataset
-       const rawWurt = [
-    { "german": "Ruhe, schweigen", "english": "quiet, to be silent" },
-    { "german": "ruhig, verschwiegen", "english": "quiet, discreet" },
-    { "german": "Im Zimmer herrschte absolute Stille.", "english": "Absolute silence reigned in the room." },
-    { "german": "Sehenswürdigkeit", "english": "sight, tourist attraction" },
-    { "german": "In Schottland gibt es viele Sehenswürdigkeiten.", "english": "There are many sights in Scotland." },
-    { "german": "Stadtrundfahrt", "english": "city tour" },
-    { "german": "launig, witzig, Oscar Wilde ist bekannt für seine witzigen Sprüche", "english": "humorous, witty; Oscar Wilde is known for his witty sayings" },
-    { "german": "warum, warum bittest du nicht um Hilfe? Warum nicht?", "english": "why, why don't you ask for help? Why not?" },
-    { "german": "wessen, deren, dessen", "english": "whose, their/her, whose/his" },
-    { "german": "Wessen Idee war das?", "english": "Whose idea was that?" },
-    { "german": "Das ist der Mann, dessen Auto gestohlen wurde.", "english": "That is the man whose car was stolen." },
-    { "german": "flüstern, tuscheln", "english": "to whisper" },
-    { "german": "Ökonom", "english": "economist" },
-    { "german": "Wirtschaft, Ökonomie", "english": "economy, economics" },
-    { "german": "Touristenklasse", "english": "tourist class, economy class" },
-    { "german": "herausgeben, regieren", "english": "to publish, to rule" },
-    { "german": "Bildung", "english": "education, formation" },
-    { "german": "geboren", "english": "born" },
-    { "german": "werden", "english": "to become" },
-    { "german": "Mann", "english": "man, husband" },
-    { "german": "Mensch, ich würde", "english": "human, person; I would" },
-    { "german": "Menschheit", "english": "mankind, humanity" },
-    { "german": "Sie mag Männer, die kochen können.", "english": "She likes men who can cook." },
-    { "german": "Klassizismus", "english": "classicism" },
-    { "german": "Der Klassizismus war eine Kunstrichtung, in der die Kunst der Antike nachgeahmt wurde.", "english": "Classicism was an artistic movement in which the art of antiquity was imitated." },
-    { "german": "Auflage, die Zeitung hat eine Auflage von 200.000 Stück", "english": "edition/circulation; the newspaper has a circulation of 200,000 copies" },
-    { "german": "Schicht, sie kommt aus der Oberschicht", "english": "layer/class; she comes from the upper class" },
-    { "german": "Klassengesellschaft", "english": "class society" },
-    { "german": "Durchblutung, Kreislauf", "english": "blood circulation, circulatory system" },
-    { "german": "zerkleinern, hacken, Kotelett", "english": "to chop up, to mince; chop/cutlet" },
-    { "german": "wählen", "english": "to choose, to vote, to dial" },
-    { "german": "Cholesterin", "english": "cholesterol" },
-    { "german": "Zeichen, du kannst bis zu 50 Zeichen eingeben", "english": "character/sign; you can enter up to 50 characters" },
-    { "german": "Sonderzeichen", "english": "special character" },
-    { "german": "Kanzler", "english": "chancellor" },
-    { "german": "Meister", "english": "master" },
-    { "german": "Meisterschaft", "english": "championship" },
-    { "german": "Manieren, Umgangsformen", "english": "manners, etiquette" },
-    { "german": "Pommes", "english": "french fries" },
-    { "german": "Charterflug, sie sind mit einem Charterflug nach Tunesien geflogen", "english": "charter flight; they flew to Tunisia on a charter flight" },
-    { "german": "charmant, was für ein charmanter Mann", "english": "charming; what a charming man" },
-    { "german": "frech, mein Bruder ist ein kleiner Frechdachs", "english": "cheeky, naughty; my brother is a little rascal" },
-    { "german": "Schornstein", "english": "chimney" },
-    { "german": "Jedes Reihenhaus hat einen Schornstein auf dem Dach.", "english": "Every terraced house has a chimney on the roof." },
-    { "german": "Schornsteinfeger", "english": "chimney sweep" },
-    { "german": "Kritiker", "english": "critic" },
-    { "german": "Sterblichkeit", "english": "mortality" },
-    { "german": "Steuerrate", "english": "tax rate" },
-    { "german": "Autobahn", "english": "highway, motorway" },
-    { "german": "Schnurrbart", "english": "moustache" },
-    { "german": "Stadtrat", "english": "city council, city councilor" },
-    { "german": "kurzsichtig", "english": "short-sighted, myopic" },
-    { "german": "Nagel, Chris verfehlte den Nagel und schlug sich auf den Finger; Nagelpistole", "english": "nail; Chris missed the nail and hit his finger; nail gun" },
-    { "german": "stummschalten", "english": "to mute" },
-    { "german": "sprachlos", "english": "speechless" },
-    { "german": "stumm", "english": "mute, silent" },
-    { "german": "Muskel", "english": "muscle" },
-    { "german": "Wandgemälde, der Archäologe entdeckte im Grab ein Wandgemälde", "english": "mural, wall painting; the archaeologist discovered a mural in the tomb" },
-    { "german": "arbeitslos", "english": "unemployed" },
-    { "german": "Arbeitslosigkeit", "english": "unemployment" },
-    { "german": "bewusstlos", "english": "unconscious" },
-    { "german": "brachte", "english": "brought" },
-    { "german": "Reifen", "english": "tire" },
-    { "german": "schreien, rufen, anbrüllen, anschreien", "english": "to shout, to call out, to roar at, to yell at" },
-    { "german": "drehen", "english": "to turn, to film/shoot" },
-    { "german": "Schuhcreme", "english": "shoe polish" },
-    { "german": "Gemeinwohl", "english": "public interest, common good" },
-    { "german": "Rasierschaum", "english": "shaving cream" },
-    { "german": "ausfindig machen, erspähen", "english": "to locate, to track down, to spot" },
-    { "german": "Wie viele Fehler hast du gefunden?", "english": "How many mistakes did you find?" },
-    { "german": "fordern", "english": "to demand, to challenge" },
-    { "german": "sponsoren, Sponsor", "english": "to sponsor, sponsor" },
-    { "german": "Die Show wird von der Telefongesellschaft gesponsert.", "english": "The show is sponsored by the telephone company." },
-    { "german": "Förderer, Förderin", "english": "pator, sponsor, supporter (male/female)" },
-    { "german": "Steckdose", "english": "power outlet, socket" },
-    { "german": "Weltraum, Weltraumforschung, Raumschiff", "english": "outer space, space exploration, spaceship" },
-    { "german": "Der Kanzler war gezwungen zurückzutreten.", "english": "The chancellor was forced to resign." },
-    { "german": "Gesellschaft, es ist allzu einfach, der Gesellschaft die Schuld zu geben", "english": "society; it is all too easily to blame society" },
-    { "german": "glätten, ebnen, glatt, sanft", "english": "to smooth, to level; smooth, soft/gentle" },
-    { "german": "riechen, Duft, Geruch", "english": "to smell; scent, odor" },
-    { "german": "listig, schlau", "english": "sly, cunning, clever" },
-    { "german": "Pantoffeln, ich liebe flauschige Pantoffeln", "english": "slippers; I love fluffy slippers" },
-    { "german": "Schädel", "english": "skull" },
-    { "german": "Spüle", "english": "sink (kitchen)" },
-    { "german": "sündigen, Todsünden, Sühne / Sin", "english": "to sin, mortal sins, atonement" },
-    { "german": "ähnlich, Mars und Erde sind sich sehr ähnlich", "english": "similar; Mars and Earth are very similar" },
-    { "german": "Anzeige, Webspot, Werbung", "english": "advertisement, web spot, advertising" },
-    { "german": "Dreifaltigkeit", "english": "Trinity" },
-    { "german": "Schwein", "english": "pig, pork" },
-    { "german": "Bürgersteig", "english": "pavement, sidewalk" },
-    { "german": "Der Weg war matschig.", "english": "The path was muddy." },
-    { "german": "wahrscheinlich, die Fahrt dauert wahrscheinlich drei Stunden", "english": "probably; the journey will probably take three hours" },
-    { "german": "Gefängnis", "english": "prison" },
-    { "german": "Drucker, drucken", "english": "printer, to print" },
-    { "german": "hübsch, ziemlich", "english": "pretty, quite" },
-    { "german": "Geschenk, Gegenwart", "english": "gift/present, present (time)" },
-    { "german": "bevorzugen, lieber haben", "english": "to prefer" },
-    { "german": "Pfund", "english": "pound" },
-    { "german": "arm, schlecht", "english": "poor, bad" },
-    { "german": "weil, da", "english": "because" },
-    { "german": "Beifahrer", "english": "front passenger" },
-    { "german": "so... wie...", "english": "as... as..." },
-    { "german": "was... angeht", "english": "as far as... is concerned" },
-    { "german": "beschämt, sie schämte sich wegen ihrer Vergangenheit", "english": "ashamed; she was ashamed of her past" },
-    { "german": "Aschenbecher, es gibt keinen Aschenbecher auf dem Balkon", "english": "ashtray; there is no ashtray on the balcony" },
-    { "german": "Attentäter, Attentat, er überlebte das Attentat", "english": "assassin/attacker, assassination attempt; he survived the assassination attempt" },
-    { "german": "Verband, Association, Vereinigung", "english": "association, bandage, federation" },
-    { "german": "Besucherzahl", "english": "visitor number, attendance" },
-    { "german": "Dachgeschoss, Speicher", "english": "attic, top floor" },
-    { "german": "anziehen, anziehend", "english": "to attract/wear, attractive" },
-    { "german": "einander, gegenseitig", "english": "each other, mutually" },
-    { "german": "Klößchen, Knödel", "english": "dumpling" },
-    { "german": "Cover, Titelblatt", "english": "cover, title page" },
-    { "german": "Laune, Stimmung, gut drauf sein, schlecht drauf sein, launisch, murrisch", "english": "mood; to be in a good/bad mood; moody, grumpy" },
-    { "german": "Spielfeld", "english": "playing field, court" },
-    { "german": "Leinwand, Gemälde", "english": "canvas/screen, painting" },
-    { "german": "Bildunterschrift", "english": "caption" },
-    { "german": "Arbeitsethik", "english": "work ethic" },
-    { "german": "Vereinbarkeit von Beruf und Privatleben", "english": "work-life balance" },
-    { "german": "hitzebeständig", "english": "heatproof, heat-resistant" },
-    { "german": "Heizkörper", "english": "radiator" },
-    { "german": "Gottesdienst", "english": "church service" },
-    { "german": "Gemeindezentrum", "english": "community center, parish hall" },
-    { "german": "Gemeinde", "english": "congregation, community" },
-    { "german": "Pastor", "english": "pastor" },
-    { "german": "Predigt", "english": "sermon" },
-    { "german": "Taufe", "english": "baptism" },
-    { "german": "taufen", "english": "to baptize" },
-    { "german": "Taufbecken", "english": "baptismal font" },
-    { "german": "Taufspruch", "english": "baptismal verse" },
-    { "german": "glauben", "english": "to believe" },
-    { "german": "Glaube", "english": "faith" },
-    { "german": "gläubig", "english": "believing, faithful" },
-    { "german": "Bekenntnis", "english": "confession, testimony" },
-    { "german": "bekennen", "english": "to confess" },
-    { "german": "Gebet", "english": "prayer" },
-    { "german": "beten", "english": "to pray" },
-    { "german": "Segen", "english": "blessing" },
-    { "german": "segnen", "english": "to bless" },
-    { "german": "Himmel", "english": "heaven, sky" },
-    { "german": "Erde", "english": "earth" },
-    { "german": "Schöpfer", "english": "creator" },
-    { "german": "Schöpfung", "english": "creation" },
-    { "german": "Ewigkeit", "english": "eternity" },
-    { "german": "ewig", "english": "eternal" },
-    { "german": "Gnade", "english": "grace, mercy" },
-    { "german": "gnädig", "english": "gracious, merciful" },
-    { "german": "Barmherzigkeit", "english": "compassion, mercy" },
-    { "german": "Vergebung", "english": "forgiveness" },
-    { "german": "vergeben", "english": "to forgive" },
-    { "german": "Sünde", "english": "sin" },
-    { "german": "Heil", "english": "salvation, health" },
-    { "german": "retten", "english": "to save, to rescue" },
-    { "german": "Rettung", "english": "salvation, rescue" },
-    { "german": "Erlösung", "english": "redemption" },
-    { "german": "Auferstehung", "english": "resurrection" },
-    { "german": "Kreuz", "english": "cross" },
-    { "german": "Kreuzigung", "english": "crucifixion" },
-    { "german": "Opfer", "english": "sacrifice, victim" },
-    { "german": "Lied", "english": "song" },
-    { "german": "Gesangbuch", "english": "hymnal" },
-    { "german": "Chor", "english": "choir" },
-    { "german": "Orgel", "english": "organ (instrument)" },
-    { "german": "Musik", "english": "music" },
-    { "german": "Lobpreis", "english": "praise, worship" },
-    { "german": "Anbetung", "english": "adoration, worship" },
-    { "german": "Gemeinschaft", "english": "fellowship, community" },
-    { "german": "Geschwister", "english": "brothers and sisters (church family)" },
-    { "german": "Diakonie", "english": "diaconal ministry, charitable work" },
-    { "german": "Kirche", "english": "church" },
-    { "german": "Kapelle", "english": "chapel" },
-    { "german": "Altar", "english": "altar" },
-    { "german": "Kanzel", "english": "pulpit" },
-    { "german": "Kollekte", "english": "collection, offering" },
-    { "german": "Abendmahl", "english": "Communion, Lord's Supper" },
-    { "german": "Bibel", "english": "Bible" },
-    { "german": "Heilige Schrift", "english": "Holy Scriptures" },
-    { "german": "Evangelium", "english": "Gospel" },
-    { "german": "Apostel", "english": "apostle" },
-    { "german": "Prophet", "english": "prophet" },
-    { "german": "Jünger", "english": "disciple" },
-    { "german": "Nachfolge", "english": "following (discipleship)" },
-    { "german": "nachfolgen", "english": "to follow" },
-    { "german": "Zeugnis", "english": "testimony, certificate" },
-    { "german": "Hoffnung", "english": "hope" },
-    { "german": "Liebe", "english": "love" },
-    { "german": "Frieden", "english": "peace" },
-    { "german": "Freude", "english": "joy" },
-    { "german": "Demut", "english": "humility" },
-    { "german": "Geduld", "english": "patience" },
-    { "german": "Weisheit", "english": "wisdom" },
-    { "german": "Wahrheit", "english": "truth" },
-    { "german": "Licht", "english": "light" },
-    { "german": "Dunkelheit", "english": "darkness" },
-    { "german": "Weg", "english": "way, path" },
-    { "german": "Hirte", "english": "shepherd" },
-    { "german": "König", "english": "king" },
-    { "german": "Herr", "english": "Lord, gentleman" },
-    { "german": "Vater", "english": "Father" },
-    { "german": "Sohn", "english": "Son" },
-    { "german": "Heiliger Geist", "english": "Holy Spirit" },
-    { "german": "Dreieinigkeit", "english": "Trinity" },
-    { "german": "Gebot", "english": "commandment" },
-    { "german": "Gesetz", "english": "law" },
-    { "german": "Wunder", "english": "miracle, wonder" },
-    { "german": "Paradies", "english": "paradise" },
-    { "german": "Engel", "english": "angel" },
-    { "german": "Teufel", "english": "devil" },
-    { "german": "Versuchung", "english": "temptation" },
-    { "german": "Prüfung", "english": "test, exam" },
-    { "german": "Leiden", "english": "suffering" },
-    { "german": "Schmerz", "english": "pain" },
-    { "german": "Tröster", "english": "comforter" },
-    { "german": "Trost", "english": "comfort, consolation" },
-    { "german": "Zuflucht", "english": "refuge" },
-    { "german": "Stärke", "english": "strength" },
-    { "german": "Schwäche", "english": "weakness" },
-    { "german": "Kraft", "english": "power, strength" },
-    { "german": "Allmacht", "english": "omnipotence" },
-    { "german": "allmorgendlich", "english": "every morning" },
-    { "german": "Dankbarkeit", "english": "gratitude" },
-    { "german": "danken", "english": "to thank" },
-    { "german": "loben", "english": "to praise" },
-    { "german": "ehren", "english": "to honor" },
-    { "german": "Ehre", "english": "honor" },
-    { "german": "Verkündigung", "english": "proclamation, preaching" },
-    { "german": "Botschaft", "english": "message" },
-    { "german": "Wort", "english": "word" },
-    { "german": "Schriftstelle", "english": "scripture passage" },
-    { "german": "Vers", "english": "verse" },
-    { "german": "Kapitel", "english": "chapter" },
-    { "german": "Theologie", "english": "theology" },
-    { "german": "Theologe", "english": "theologian" },
-    { "german": "Glaube, Liebe, Hoffnung", "english": "faith, hope, love" },
-    { "german": "Segen von oben", "english": "blessing from above" },
-    { "german": "Heiligung", "english": "sanctification" },
-    { "german": "Rechtfertigung", "english": "justification" },
-    { "german": "Erlöser", "english": "Redeemer" },
-    { "german": "Heiland", "english": "Savior" },
-    { "german": "Messias", "english": "Messiah" },
-    { "german": "Immanuel", "english": "Immanuel (God with us)" },
-    { "german": "Alpha und Omega", "english": "Alpha and Omega" },
-    { "german": "Lamm Gottes", "english": "Lamb of God" },
-    { "german": "Wort Gottes", "english": "Word of God" },
-    { "german": "Reich Gottes", "english": "Kingdom of God" },
-    { "german": "Himmlisches Jerusalem", "english": "Heavenly Jerusalem" },
-    { "german": "ewiges Leben", "english": "eternal life" },
-    { "german": "Seelenfrieden", "english": "peace of mind, inner peace" },
-    { "german": "Gewissen", "english": "conscience" },
-    { "german": "reines Gewissen", "english": "clear conscience" },
-    { "german": "Schuld", "english": "guilt, debt" },
-    { "german": "unschuldig", "english": "innocent" },
-    { "german": "gerecht", "english": "righteous, fair" },
-    { "german": "Gerechtigkeit", "english": "righteousness, justice" },
-    { "german": "Barmherzig", "english": "merciful" },
-    { "german": "Nächstenliebe", "english": "charity, love for one's neighbor" },
-    { "german": "Diakon", "english": "deacon" },
-    { "german": "Ältester", "english": "elder" },
-    { "german": "Gemeindemitglied", "english": "church member" },
-    { "german": "Gotteshaus", "english": "house of God" },
-    { "german": "Kirchenbank", "english": "church pew" },
-    { "german": "Opfergabe", "english": "offering, donation" },
-    { "german": "Ministrant", "english": "altar server" },
-    { "german": "Sakrament", "english": "sacrament" },
-    { "german": "Segnung", "english": "benediction, blessing" },
-    { "german": "Morgenandacht", "english": "morning devotion" },
-    { "german": "Abendgebet", "english": "evening prayer" },
-    { "german": "Lobgesang", "english": "hymn of praise" },
-    { "german": "Glaubensbekenntnis", "english": "creed, confession of faith" },
-    { "german": "Psalter", "english": "Psalter" },
-    { "german": "Psalm", "english": "Psalm" },
-    { "german": "Spross", "english": "offshoot, sprout" },
-    { "german": "Wurzel", "english": "root" },
-    { "german": "Fels", "english": "rock" },
-    { "german": "Anker", "english": "anchor" },
-    { "german": "Schild", "english": "shield, sign" },
-    { "german": "Festung", "english": "fortress" },
-    { "german": "Zufluchtsort", "english": "place of refuge" },
-    { "german": "Wächter", "english": "watchman, guard" },
-    { "german": "Diener", "english": "servant" },
-    { "german": "Magd", "english": "maidservant" },
-    { "german": "Knecht", "english": "servant, farmhand" },
-    { "german": "Braut", "english": "bride" },
-    { "german": "Bräutigam", "english": "groom" },
-    { "german": "Hochzeit des Lammes", "english": "Wedding of the Lamb" },
-    { "german": "Verheißung", "english": "promise" },
-    { "german": "Bund", "english": "covenant, alliance" },
-    { "german": "Neuer Bund", "english": "New Covenant" },
-    { "german": "Alter Bund", "english": "Old Covenant" },
-    { "german": "Gesetzestafeln", "english": "tablets of the law" },
-    { "german": "Bundeslade", "english": "Ark of the Covenant" },
-    { "german": "Stiftshütte", "english": "Tabernacle" },
-    { "german": "Tempel", "english": "temple" },
-    { "german": "Vorhang", "english": "curtain, veil" },
-    { "german": "Opferlamm", "english": "sacrificial lamb" },
-    { "german": "Blut", "english": "blood" },
-    { "german": "Wunden", "english": "wounds" },
-    { "german": "Dornenkrone", "english": "crown of thorns" },
-    { "german": "Grab", "english": "grave, tomb" },
-    { "german": "leeres Grab", "english": "empty tomb" },
-    { "german": "Stein", "english": "stone" },
-    { "german": "Weggerollt", "english": "rolled away" },
-    { "german": "Himmelfahrt", "english": "Ascension" },
-    { "german": "Wiederkunft", "english": "Second Coming" },
-    { "german": "Jüngstes Gericht", "english": "Last Judgment" },
-    { "german": "Gericht", "english": "judgment, dish, court" },
-    { "german": "Offenbarung", "english": "Revelation, disclosure" },
-    { "german": "Endzeit", "english": "end times" },
-    { "german": "Wiedergabe", "english": "reproduction, rendering" },
-    { "german": "Freikirche", "english": "free church" },
-    { "german": "Landeskirche", "english": "state church, regional church" },
-    { "german": "Ökumene", "english": "ecumenism" },
-  { "german": "Guten Morgen!", "english": "Good morning!" },
-  { "german": "Guten Tag!", "english": "Good afternoon / Hello!" },
-  { "german": "Guten Abend!", "english": "Good evening!" },
-  { "german": "Hallo!", "english": "Hello!" },
-  { "german": "Wie geht es Ihnen?", "english": "How are you? (Formal)" },
-  { "german": "Wie geht's?", "english": "How's it going? (Informal)" },
-  { "german": "Mir geht's gut, danke.", "english": "I'm doing well, thanks." },
-  { "german": "Auf Wiedersehen!", "english": "Goodbye! (Formal)" },
-  { "german": "Tschüss!", "english": "Bye! (Informal)" },
-  { "german": "Bis bald!", "english": "See you soon!" },
-  { "german": "Gute Nacht!", "english": "Good night!" },
-  { "german": "Bitte schön / Bitte sehr.", "english": "You're welcome / Here you go." },
-  { "german": "Danke schön!", "english": "Thank you very much!" },
-  { "german": "Entschuldigung!", "english": "Excuse me / Sorry!" },
-  { "german": "Es tut mir leid.", "english": "I am sorry." },
-  { "german": "Kein Problem.", "english": "No problem." },
-  { "german": "Prost! / Zum Wohl!", "english": "Cheers!" },
-  { "german": "Ja", "english": "Yes" },
-  { "german": "Nein", "english": "No" },
-  { "german": "Vielleicht", "english": "Maybe" },
-  { "german": "Genau!", "english": "Exactly! / That's right!" },
-  { "german": "Natürlich!", "english": "Of course!" },
-  { "german": "Ein bisschen", "english": "A little bit" },
-  { "german": "Alles klar!", "english": "All right! / Got it!" },
-  { "german": "Das stimmt.", "english": "That's correct." },
-  { "german": "Ich weiß (nicht).", "english": "I (don't) know." },
-  { "german": "Keine Ahnung.", "english": "No idea." },
-  { "german": "Einverstanden.", "english": "Agreed." },
-  { "german": "Das macht nichts.", "english": "It doesn't matter." },
-  { "german": "Auf keinen Fall!", "english": "No way! / Absolutely not!" },
-  { "german": "Was ist das?", "english": "What is that?" },
-  { "german": "Wer bist du?", "english": "Who are you? (Informal)" },
-  { "german": "Wo ist...?", "english": "Where is...?" },
-  { "german": "Wann?", "english": "When?" },
-  { "german": "Warum?", "english": "Why?" },
-  { "german": "Wie viel kostet das?", "english": "How much does this cost?" },
-  { "german": "Sprechen Sie Englisch?", "english": "Do you speak English? (Formal)" },
-  { "german": "Ich verstehe nicht.", "english": "I don't understand." },
-  { "german": "Können Sie das wiederholen?", "english": "Can you repeat that? (Formal)" },
-  { "german": "Wie bitte?", "english": "Pardon? / Come again?" },
-  { "german": "Mir ist kalt.", "english": "I am cold." },
-  { "german": "Mir ist heiß.", "english": "I am hot." },
-  { "german": "Ich habe Hunger.", "english": "I am hungry." },
-  { "german": "Ich habe Durst.", "english": "I am thirsty." },
-  { "german": "Ich bin müde.", "english": "I am tired." },
-  { "german": "Mir geht's nicht gut.", "english": "I don't feel well." },
-  { "german": "Ich habe Zeit.", "english": "I have time." },
-  { "german": "Ich habe keine Zeit.", "english": "I don't have time." },
-  { "german": "Es ist eilig.", "english": "It's urgent." },
-  { "german": "Ich freue mich.", "english": "I'm looking forward to it / I'm glad." },
-  { "german": "Was gibt's Neues?", "english": "What's new?" },
-  { "german": "Mach's gut!", "english": "Take care!" },
-  { "german": "aber", "english": "but" },
-  { "german": "auch", "english": "also / too" },
-  { "german": "auch wenn", "english": "even if" },
-  { "german": "beziehungsweise (bzw.)", "english": "or rather / respectively" },
-  { "german": "denn", "english": "because / for" },
-  { "german": "doch", "english": "yet / after all / on the contrary" },
-  { "german": "eigentlich", "english": "actually / really" },
-  { "german": "entweder ... oder", "english": "either ... or" },
-  { "german": "fast", "english": "almost" },
-  { "german": "gerade", "english": "just / currently" },
-  { "german": "halt / eben", "english": "simply / that's just how it is" },
-  { "german": "immer", "english": "always" },
-  { "german": "irgendwie", "english": "somehow" },
-  { "german": "irgendwo", "english": "somewhere" },
-  { "german": "ja", "english": "indeed / as you know" },
-  { "german": "nämlich", "english": "namely / you see" },
-  { "german": "noch", "english": "still / yet" },
-  { "german": "nur", "english": "only" },
-  { "german": "oft", "english": "often" },
-  { "german": "schon", "english": "already" },
-  { "german": "sogar", "english": "even" },
-  { "german": "sonst", "english": "otherwise" },
-  { "german": "trotzdem", "english": "nevertheless / anyway" },
-  { "german": "überhaupt", "english": "at all / generally" },
-  { "german": "vielleicht", "english": "perhaps" },
-  { "german": "wieder", "english": "again" },
-  { "german": "zwar", "english": "admittedly / indeed" },
-  { "german": "zusammen", "english": "together" },
-  { "german": "Warte mal!", "english": "Wait a moment!" },
-  { "german": "Komm schon!", "english": "Come on!" },
-  { "german": "Lass mich in Ruhe!", "english": "Leave me alone!" },
-  { "german": "Pass auf!", "english": "Watch out! / Pay attention!" },
-  { "german": "Keine Sorge!", "english": "Don't worry!" },
-  { "german": "Mach dir keine Sorgen.", "english": "Don't fret about it." },
-  { "german": "Das ist mir egal.", "english": "I don't care / It's all the same to me." },
-  { "german": "Lass uns gehen.", "english": "Let's go." },
-  { "german": "Bis später!", "english": "See you later!" },
-  { "german": "Schönen Tag noch!", "english": "Have a nice day!" },
-  { "german": "Gute Besserung!", "english": "Get well soon!" },
-  { "german": "Viel Erfolg!", "english": "Good luck!" },
-  { "german": "Herzlichen Glückwunsch!", "english": "Congratulations!" },
-  { "german": "Alles Gute zum Geburtstag!", "english": "Happy birthday!" },
-  { "german": "Mahlzeit!", "english": "Enjoy your meal!" },
-  { "german": "Vielen Dank im Voraus.", "english": "Thank you in advance." },
-  { "german": "Bis zum nächsten Mal!", "english": "Until next time!" },
-  { "german": "Mach keinen Blödsinn!", "english": "Don't do anything foolish!" },
-  { "german": "Das ist super!", "english": "That's great!" },
-  { "german": "Schade!", "english": "What a pity! / Too bad!" }
-];
+        // 5 Dedicated Edge Memory Categories
+        const categoryData = {
+            greetings: [
+                { "german": "Guten Morgen!", "english": "Good morning!" },
+                { "german": "Guten Tag!", "english": "Good afternoon / Hello!" },
+                { "german": "Guten Abend!", "english": "Good evening!" },
+                { "german": "Hallo!", "english": "Hello!" },
+                { "german": "Wie geht es Ihnen?", "english": "How are you? (Formal)" },
+                { "german": "Wie geht's?", "english": "How's it going? (Informal)" },
+                { "german": "Mir geht's gut, danke.", "english": "I'm doing well, thanks." },
+                { "german": "Auf Wiedersehen!", "english": "Goodbye! (Formal)" },
+                { "german": "Tschüss!", "english": "Bye! (Informal)" },
+                { "german": "Bis bald!", "english": "See you soon!" }
+            ],
+            questions: [
+                { "german": "Was ist das?", "english": "What is that?" },
+                { "german": "Wer bist du?", "english": "Who are you? (Informal)" },
+                { "german": "Wo ist...?", "english": "Where is...?" },
+                { "german": "Wann?", "english": "When?" },
+                { "german": "Warum?", "english": "Why?" },
+                { "german": "Wie viel kostet das?", "english": "How much does this cost?" },
+                { "german": "Sprechen Sie Englisch?", "english": "Do you speak English? (Formal)" },
+                { "german": "Ich verstehe nicht.", "english": "I don't understand." },
+                { "german": "Können Sie das wiederholen?", "english": "Can you repeat that? (Formal)" },
+                { "german": "Wie bitte?", "english": "Pardon? / Come again?" }
+            ],
+            feelings: [
+                { "german": "Mir ist kalt.", "english": "I am cold." },
+                { "german": "Mir ist heiß.", "english": "I am hot." },
+                { "german": "Ich habe Hunger.", "english": "I am hungry." },
+                { "german": "Ich habe Durst.", "english": "I am thirsty." },
+                { "german": "Ich bin müde.", "english": "I am tired." },
+                { "german": "Mir geht's nicht gut.", "english": "I don't feel well." },
+                { "german": "Ich habe Zeit.", "english": "I have time." },
+                { "german": "Ich habe keine Zeit.", "english": "I don't have time." },
+                { "german": "Es ist eilig.", "english": "It's urgent." },
+                { "german": "Ich freue mich.", "english": "I'm looking forward to it / I'm glad." }
+            ],
+            reactions: [
+                { "german": "Warte mal!", "english": "Wait a moment!" },
+                { "german": "Komm schon!", "english": "Come on!" },
+                { "german": "Pass auf!", "english": "Watch out! / Pay attention!" },
+                { "german": "Keine Sorge!", "english": "Don't worry!" },
+                { "german": "Das ist mir egal.", "english": "I don't care / It's all the same to me." },
+                { "german": "Das ist super!", "english": "That's great!" },
+                { "german": "Schade!", "english": "What a pity! / Too bad!" },
+                { "german": "Genau!", "english": "Exactly! / That's right!" },
+                { "german": "Natürlich!", "english": "Of course!" },
+                { "german": "Keine Ahnung.", "english": "No idea." }
+            ],
+            connectors: [
+                { "german": "aber", "english": "but" },
+                { "german": "auch", "english": "also / too" },
+                { "german": "auch wenn", "english": "even if" },
+                { "german": "beziehungsweise (bzw.)", "english": "or rather / respectively" },
+                { "german": "denn", "english": "because / for" },
+                { "german": "doch", "english": "yet / after all / on the contrary" },
+                { "german": "eigentlich", "english": "actually / really" },
+                { "german": "entweder ... oder", "english": "either ... or" },
+                { "german": "trotzdem", "english": "nevertheless / anyway" },
+                { "german": "zwar", "english": "admittedly / indeed" }
+            ]
+        };
+
+        // Full pool combining everything for "All" option
+        const rawWurt = [
+            ...categoryData.greetings,
+            ...categoryData.questions,
+            ...categoryData.feelings,
+            ...categoryData.reactions,
+            ...categoryData.connectors
+        ];
+
         let cards = [];
         let flippedCards = [];
         let matchedPairs = 0;
@@ -559,6 +227,7 @@
         const finalMovesEl = document.getElementById('final-moves');
         const finalTimeEl = document.getElementById('final-time');
         const roundSizeSelect = document.getElementById('round-size');
+        const categorySelect = document.getElementById('category-select');
 
         function startTimer() {
             if (timerStarted) return;
@@ -589,34 +258,24 @@
             moveCountEl.textContent = moves;
             winModalEl.classList.add('hidden');
 
-            const desiredPairs = parseInt(roundSizeSelect.value, 10);
+            const selectedCat = categorySelect.value;
+            let activePool = selectedCat === 'all' ? rawWurt : (categoryData[selectedCat] || rawWurt);
+
+            const desiredPairs = Math.min(parseInt(roundSizeSelect.value, 10), activePool.length);
             totalPairsEl.textContent = desiredPairs;
             matchCountEl.textContent = matchedPairs;
 
-            // Shuffle and pick subset of vocabulary
-            const shuffledPool = [...rawWurt].sort(() => Math.random() - 0.5);
+            // Shuffle and pick subset
+            const shuffledPool = [...activePool].sort(() => Math.random() - 0.5);
             const selectedSubset = shuffledPool.slice(0, desiredPairs);
 
             let deck = [];
             selectedSubset.forEach((item, index) => {
                 const pairId = index + 1;
-                // German Card
-                deck.push({
-                    pairId: pairId,
-                    text: item.german,
-                    lang: 'de',
-                    langLabel: 'DE'
-                });
-                // English Card
-                deck.push({
-                    pairId: pairId,
-                    text: item.english,
-                    lang: 'en',
-                    langLabel: 'EN'
-                });
+                deck.push({ pairId: pairId, text: item.german, lang: 'de', langLabel: 'DE' });
+                deck.push({ pairId: pairId, text: item.english, lang: 'en', langLabel: 'EN' });
             });
 
-            // Shuffle deck
             cards = deck.sort(() => Math.random() - 0.5);
             renderBoard();
         }
@@ -672,7 +331,6 @@
 
                 const [first, second] = flippedCards;
 
-                // Match condition: same pairId but different language
                 if (first.card.pairId === second.card.pairId && first.card.lang !== second.card.lang) {
                     setTimeout(() => {
                         first.element.parentElement.classList.add('matched', 'opacity-75', 'pointer-events-none');
@@ -682,7 +340,7 @@
                         flippedCards = [];
                         isProcessing = false;
 
-                        const desiredPairs = parseInt(roundSizeSelect.value, 10);
+                        const desiredPairs = parseInt(totalPairsEl.textContent, 10);
                         if (matchedPairs === desiredPairs) {
                             stopTimer();
                             finalMovesEl.textContent = moves;
@@ -711,6 +369,6 @@
                 .catch((err) => console.log('Service Worker registration failed:', err));
         });
     }
-</script>
+    </script>
 </body>
 </html>
