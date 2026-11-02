@@ -2,9 +2,7 @@ const CACHE_NAME = 'vokabelbox-memory-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+  './manifest.json'
 ];
 
 // Install Event - Caches core assets safely
