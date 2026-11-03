@@ -144,77 +144,132 @@
     <!-- Game Logic & Datasets -->
     <script>
         // 5 Dedicated Edge Memory Categories
-        const categoryData = {
-            greetings: [
-                { "german": "Guten Morgen!", "english": "Good morning!" },
-                { "german": "Guten Tag!", "english": "Good afternoon / Hello!" },
-                { "german": "Guten Abend!", "english": "Good evening!" },
-                { "german": "Hallo!", "english": "Hello!" },
-                { "german": "Wie geht es Ihnen?", "english": "How are you? (Formal)" },
-                { "german": "Wie geht's?", "english": "How's it going? (Informal)" },
-                { "german": "Mir geht's gut, danke.", "english": "I'm doing well, thanks." },
-                { "german": "Auf Wiedersehen!", "english": "Goodbye! (Formal)" },
-                { "german": "Tschüss!", "english": "Bye! (Informal)" },
-                { "german": "Bis bald!", "english": "See you soon!" }
-            ],
-            questions: [
-                { "german": "Was ist das?", "english": "What is that?" },
-                { "german": "Wer bist du?", "english": "Who are you? (Informal)" },
-                { "german": "Wo ist...?", "english": "Where is...?" },
-                { "german": "Wann?", "english": "When?" },
-                { "german": "Warum?", "english": "Why?" },
-                { "german": "Wie viel kostet das?", "english": "How much does this cost?" },
-                { "german": "Sprechen Sie Englisch?", "english": "Do you speak English? (Formal)" },
-                { "german": "Ich verstehe nicht.", "english": "I don't understand." },
-                { "german": "Können Sie das wiederholen?", "english": "Can you repeat that? (Formal)" },
-                { "german": "Wie bitte?", "english": "Pardon? / Come again?" }
-            ],
-            feelings: [
-                { "german": "Mir ist kalt.", "english": "I am cold." },
-                { "german": "Mir ist heiß.", "english": "I am hot." },
-                { "german": "Ich habe Hunger.", "english": "I am hungry." },
-                { "german": "Ich habe Durst.", "english": "I am thirsty." },
-                { "german": "Ich bin müde.", "english": "I am tired." },
-                { "german": "Mir geht's nicht gut.", "english": "I don't feel well." },
-                { "german": "Ich habe Zeit.", "english": "I have time." },
-                { "german": "Ich habe keine Zeit.", "english": "I don't have time." },
-                { "german": "Es ist eilig.", "english": "It's urgent." },
-                { "german": "Ich freue mich.", "english": "I'm looking forward to it / I'm glad." }
-            ],
-            reactions: [
-                { "german": "Warte mal!", "english": "Wait a moment!" },
-                { "german": "Komm schon!", "english": "Come on!" },
-                { "german": "Pass auf!", "english": "Watch out! / Pay attention!" },
-                { "german": "Keine Sorge!", "english": "Don't worry!" },
-                { "german": "Das ist mir egal.", "english": "I don't care / It's all the same to me." },
-                { "german": "Das ist super!", "english": "That's great!" },
-                { "german": "Schade!", "english": "What a pity! / Too bad!" },
-                { "german": "Genau!", "english": "Exactly! / That's right!" },
-                { "german": "Natürlich!", "english": "Of course!" },
-                { "german": "Keine Ahnung.", "english": "No idea." }
-            ],
-            connectors: [
-                { "german": "aber", "english": "but" },
-                { "german": "auch", "english": "also / too" },
-                { "german": "auch wenn", "english": "even if" },
-                { "german": "beziehungsweise (bzw.)", "english": "or rather / respectively" },
-                { "german": "denn", "english": "because / for" },
-                { "german": "doch", "english": "yet / after all / on the contrary" },
-                { "german": "eigentlich", "english": "actually / really" },
-                { "german": "entweder ... oder", "english": "either ... or" },
-                { "german": "trotzdem", "english": "nevertheless / anyway" },
-                { "german": "zwar", "english": "admittedly / indeed" }
-            ]
-        };
+       const categoryData = {
+    greetings: [
+        { "german": "Guten Morgen!", "english": "Good morning!" },
+        { "german": "Guten Tag!", "english": "Good afternoon / Hello!" },
+        { "german": "Guten Abend!", "english": "Good evening!" },
+        { "german": "Hallo!", "english": "Hello!" },
+        { "german": "Wie geht es Ihnen?", "english": "How are you? (Formal)" },
+        { "german": "Wie geht's?", "english": "How's it going? (Informal)" },
+        { "german": "Mir geht's gut, danke.", "english": "I'm doing well, thanks." },
+        { "german": "Auf Wiedersehen!", "english": "Goodbye! (Formal)" },
+        { "german": "Tschüss!", "english": "Bye! (Informal)" },
+        { "german": "Bis bald!", "english": "See you soon!" }
+    ],
+    questions: [
+        { "german": "Was ist das?", "english": "What is that?" },
+        { "german": "Wer bist du?", "english": "Who are you? (Informal)" },
+        { "german": "Wo ist...?", "english": "Where is...?" },
+        { "german": "Wann?", "english": "When?" },
+        { "german": "Warum?", "english": "Why?" },
+        { "german": "Wie viel kostet das?", "english": "How much does this cost?" },
+        { "german": "Sprechen Sie Englisch?", "english": "Do you speak English? (Formal)" },
+        { "german": "Ich verstehe nicht.", "english": "I don't understand." },
+        { "german": "Können Sie das wiederholen?", "english": "Can you repeat that? (Formal)" },
+        { "german": "Wie bitte?", "english": "Pardon? / Come again?" }
+    ],
+    feelings: [
+        { "german": "Mir ist kalt.", "english": "I am cold." },
+        { "german": "Mir ist heiß.", "english": "I am hot." },
+        { "german": "Ich habe Hunger.", "english": "I am hungry." },
+        { "german": "Ich habe Durst.", "english": "I am thirsty." },
+        { "german": "Ich bin müde.", "english": "I am tired." },
+        { "german": "Mir geht's nicht gut.", "english": "I don't feel well." },
+        { "german": "Ich habe Zeit.", "english": "I have time." },
+        { "german": "Ich habe keine Zeit.", "english": "I don't have time." },
+        { "german": "Es ist eilig.", "english": "It's urgent." },
+        { "german": "Ich freue mich.", "english": "I'm looking forward to it / I'm glad." }
+    ],
+    reactions: [
+        { "german": "Warte mal!", "english": "Wait a moment!" },
+        { "german": "Komm schon!", "english": "Come on!" },
+        { "german": "Pass auf!", "english": "Watch out! / Pay attention!" },
+        { "german": "Keine Sorge!", "english": "Don't worry!" },
+        { "german": "Das ist mir egal.", "english": "I don't care / It's all the same to me." },
+        { "german": "Das ist super!", "english": "That's great!" },
+        { "german": "Schade!", "english": "What a pity! / Too bad!" },
+        { "german": "Genau!", "english": "Exactly! / That's right!" },
+        { "german": "Natürlich!", "english": "Of course!" },
+        { "german": "Keine Ahnung.", "english": "No idea." }
+    ],
+    connectors: [
+        { "german": "aber", "english": "but" },
+        { "german": "auch", "english": "also / too" },
+        { "german": "auch wenn", "english": "even if" },
+        { "german": "beziehungsweise (bzw.)", "english": "or rather / respectively" },
+        { "german": "denn", "english": "because / for" },
+        { "german": "doch", "english": "yet / after all / on the contrary" },
+        { "german": "eigentlich", "english": "actually / really" },
+        { "german": "entweder ... oder", "english": "either ... or" },
+        { "german": "trotzdem", "english": "nevertheless / anyway" },
+        { "german": "zwar", "english": "admittedly / indeed" },
+        { "german": "während", "english": "while / during" },
+        { "german": "bevor", "english": "before" },
+        { "german": "nachdem", "english": "after" }
+    ],
+    vocabulary: [
+        { "german": "die Laubhütte", "english": "booth / tabernacle / shelter" },
+        { "german": "der Schatten", "english": "shadow / shade" },
+        { "german": "die Zuflucht", "english": "refuge" },
+        { "german": "das Unwetter", "english": "storm / severe weather" },
+        { "german": "der Regen", "english": "rain" },
+        { "german": "wachsen", "english": "to grow" },
+        { "german": "selten", "english": "seldom / rare" },
+        { "german": "wieder", "english": "again" },
+        { "german": "zuerst", "english": "first / at first" },
+        { "german": "zuletzt", "english": "last / lastly" },
+        { "german": "erwecken", "english": "to awaken / arouse" },
+        { "german": "verherrlichen", "english": "to glorify" },
+        { "german": "offenbaren", "english": "to reveal" },
+        { "german": "lenken", "english": "to steer / guide" },
+        { "german": "segnen", "english": "to bless" },
+        { "german": "fluchen", "english": "to curse" },
+        { "german": "züchtigen", "english": "to chastise / discipline" },
+        { "german": "teilnehmen", "english": "to participate" },
+        { "german": "die Souveränität", "english": "sovereignty" },
+        { "german": "der Schöpfer", "english": "creator" },
+        { "german": "geschöpft", "english": "created / scooped" },
+        { "german": "der Unterschied", "english": "difference" },
+        { "german": "der unaussprechliche", "english": "the unspeakable / ineffable" },
+        { "german": "die Rechtfertigung", "english": "justification" },
+        { "german": "die Prädestination", "english": "predestination" },
+        { "german": "die Buße", "english": "repentance / penance" },
+        { "german": "die Ehrfurcht", "english": "awe / reverence" },
+        { "german": "die Demut", "english": "humility" },
+        { "german": "fromm", "english": "pious / devout" },
+        { "german": "gottlos", "english": "godless / wicked" },
+        { "german": "barmherzig", "english": "merciful" },
+        { "german": "gnädig", "english": "gracious" },
+        { "german": "treu", "english": "faithful / loyal" },
+        { "german": "untreu", "english": "unfaithful" },
+        { "german": "gerecht", "english": "just / righteous" },
+        { "german": "schuldig", "english": "guilty" },
+        { "german": "unschuldig", "english": "innocent" },
+        { "german": "heilig", "english": "holy" },
+        { "german": "unheilig", "english": "unholy" },
+        { "german": "rein", "english": "clean / pure" },
+        { "german": "schmutzig", "english": "dirty" },
+        { "german": "weise", "english": "wise" },
+        { "german": "der Richter", "english": "judge" },
+        { "german": "sanftmütig", "english": "meek / gentle" },
+        { "german": "demutig", "english": "humble" },
+        { "german": "stolz", "english": "proud" },
+        { "german": "stark", "english": "strong" },
+        { "german": "schwach", "english": "weak" },
+        { "german": "oben", "english": "above / up" },
+        { "german": "unten", "english": "below / down" }
+    ]
+};
 
-        const rawWurt = [
-            ...categoryData.greetings,
-            ...categoryData.questions,
-            ...categoryData.feelings,
-            ...categoryData.reactions,
-            ...categoryData.connectors
-        ];
-
+const rawWurt = [
+    ...categoryData.greetings,
+    ...categoryData.questions,
+    ...categoryData.feelings,
+    ...categoryData.reactions,
+    ...categoryData.connectors,
+    ...categoryData.vocabulary
+];
         let cards = [];
         let flippedCards = [];
         let matchedPairs = 0;
